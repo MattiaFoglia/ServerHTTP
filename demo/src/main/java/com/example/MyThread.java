@@ -37,15 +37,21 @@ public class MyThread extends Thread {
 
             } while (!s1.isEmpty());
 
-            if (resource.equals("/")) {
-                resource = "/index.html";
+            if (resource.endsWith("/")) {
+                resource = resource + "index.html";
             }
 
             File file = new File("htdocs" + resource);
-            if (file.exists()) {
+            if (file.isDirectory()) {
+                out.writeBytes("HTTP/1.1 301 Moved Permanently\n");
+                out.writeBytes("Content-Length:" + file.length() + " \n");
+                out.writeBytes("Location: " + resource + "/\n");
+                out.writeBytes("\n");
+
+            } else if (file.exists()) {
 
                 out.writeBytes("HTTP/1.1 200 ok\n");
-                out.writeBytes("Content-Type:" + getContentType(file)+ " \n");
+                out.writeBytes("Content-Type:" + getContentType(file) + " \n");
                 out.writeBytes("Content-Length:" + file.length() + " \n");
                 out.writeBytes("\n");
                 InputStream input = new FileInputStream(file);
@@ -56,7 +62,6 @@ public class MyThread extends Thread {
                     out.write(buf, 0, n);
                 }
                 input.close();
-
             } else {
                 String resopnseBody = "not found ";
                 out.writeBytes("HTTP/1.1 404 not found\n");
@@ -66,22 +71,20 @@ public class MyThread extends Thread {
                 out.writeBytes(resopnseBody);
             }
 
-            
             s.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        
     }
 
-    private static String getContentType(File f){
+    private static String getContentType(File f) {
         String[] s = f.getName().split("\\.");
         String ext = s[s.length - 1];
         switch (ext) {
             case "html":
-                return "text/html";    
+                return "text/html";
             case "txt":
                 return "text/txt";
             case "png":
@@ -91,7 +94,6 @@ public class MyThread extends Thread {
             default:
                 return "";
         }
-}
-
+    }
 
 }
