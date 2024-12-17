@@ -17,6 +17,7 @@ public class MyThread extends Thread {
         this.s = s;
     }
 
+    @Override
     public void run() {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -40,12 +41,13 @@ public class MyThread extends Thread {
                 resource = "/index.html";
             }
 
-            File file = new File("httdocs" + resource);
+            File file = new File("htdocs" + resource);
             if (file.exists()) {
 
                 out.writeBytes("HTTP/1.1 200 ok\n");
-                out.writeBytes("Content-Type: text/html\n");
+                out.writeBytes("Content-Type:" + getContentType(file)+ " \n");
                 out.writeBytes("Content-Length:" + file.length() + " \n");
+                out.writeBytes("\n");
                 InputStream input = new FileInputStream(file);
 
                 byte[] buf = new byte[8192];
@@ -63,12 +65,33 @@ public class MyThread extends Thread {
                 out.writeBytes("\n");
                 out.writeBytes(resopnseBody);
             }
+
+            
             s.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        
     }
+
+    private static String getContentType(File f){
+        String[] s = f.getName().split("\\.");
+        String ext = s[s.length - 1];
+        switch (ext) {
+            case "html":
+                return "text/html";    
+            case "txt":
+                return "text/txt";
+            case "png":
+                return "image/png";
+            case "css":
+                return "text/css";
+            default:
+                return "";
+        }
+}
+
 
 }
